@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title><![CDATA[协程及其实现]]></title>
-    <url>%2F2018%2F03%2F03%2Fcoroutine%2F</url>
+    <url>%2F2018%2F03%2F11%2Fcoroutine%2F</url>
     <content type="text"><![CDATA[什么是协程协程：在单线程中实现多线程的编程模式。协程没有多线程的上下文切换消耗，适合IO密集型程序。可以用协程+多进程利用多核。我们用下面一段代码来解释什么是协程：1234567891011121314151617#include &lt;stdio.h&gt;void ThreadA() &#123; printf("A0\n"); printf("A1\n");&#125;void ThreadB() &#123; printf("B0\n"); printf("B1\n");&#125;int main() &#123; while (true) &#123; ThreadA(); ThreadB(); &#125; return 0;&#125; 显然，上面的输出如下： A0A1B0B1…… 如果我们实现下面的输出，也就实现了协程： A0B0A1B1…… 对于这种输出，ThreadA和ThreadB就像是两个独立的线程在运行。那么，如何实现这种输出即如何实现协程呢？ 如何实现协程对于c/c++，我们可以利用goto和静态变量来实现，代码如下：12345678910111213141516171819202122232425262728293031323334353637#include &lt;stdio.h&gt;void ThreadA(void) &#123; static int state = 0; switch (state) &#123; case 0: goto LABEL0; case 1: goto LABEL1; &#125; LABEL0: state = 1; printf("A0\n"); return; LABEL1: state = 0; printf("A1\n");&#125;void ThreadB(void) &#123; static int state = 0; switch (state) &#123; case 0: goto LABEL0; case 1: goto LABEL1; &#125; LABEL0: state = 1; printf("B0\n"); return; LABEL1: state = 0; printf("B1\n");&#125;int main() &#123; while (true) &#123; ThreadA(); ThreadB(); &#125; return 0;&#125; 上面的输出如下： A0B0A1B1…… state静态变量保存了函数上次调用的位置（可以理解为协程的“堆栈”），再利用c/c++的goto语言特性，我们实现了协程。 协程库http://dunkels.com/adam/pt 这是一个开源C协程库，有效代码不足100行，原理和上面讲的类似。]]></content>
   </entry>
 </search>
